@@ -3,8 +3,12 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from '@/component
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAuth } from '@/hooks/use-auth'
+import { toast } from '@/hooks/use-toast'
+import { axiosClient } from '@/http/axios'
 import { emailSchema } from '@/lib/validation'
+import { IError } from '@/types'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useMutation } from '@tanstack/react-query'
 import React from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -17,10 +21,26 @@ const SignIn = () => {
 		defaultValues: { email: '' },
 	})
 
+	const { mutate, isPending } = useMutation({
+		mutationFn: async (email: string) => {
+			const { data } = await axiosClient.post<{ email: string }>('/api/auth/login', { email })
+			return data
+		},
+		onSuccess: res => {
+			setEmail(res.email)
+			setStep('verify')
+			toast({ description: 'Email sent' })
+		},
+		onError: (error: IError) => {
+			if (error.response?.data?.message) {
+				return toast({ description: error.response.data.message, variant: 'destructive' })
+			}
+			return toast({ description: 'Something went wrong', variant: 'destructive' })
+		},
+	})
+
 	function onSubmit(values: z.infer<typeof emailSchema>) {
-		// API call to send email
-		setStep('verify')
-		setEmail(values.email)
+		mutate(values.email)
 	}
 
 	return (
@@ -37,13 +57,13 @@ const SignIn = () => {
 							<FormItem>
 								<Label>Email</Label>
 								<FormControl>
-									<Input placeholder='info@sammi.ac' className='h-10 bg-secondary' {...field} />
+									<Input placeholder='info@sammi.ac' disabled={isPending} className='h-10 bg-secondary' {...field} />
 								</FormControl>
 								<FormMessage className='text-xs text-red-500' />
 							</FormItem>
 						)}
 					/>
-					<Button type='submit' className='w-full' size={'lg'}>
+					<Button type='submit' className='w-full' size={'lg'} disabled={isPending}>
 						Submit
 					</Button>
 				</form>
