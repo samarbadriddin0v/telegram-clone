@@ -15,7 +15,9 @@
 		"dotenv": "^16.4.5",
 		"express": "^4.21.1",
 		"express-group-routes": "^1.1.0",
-		"http": "^0.0.1-security"
+		"http": "^0.0.1-security",
+		"mongoose": "^8.8.1",
+		"nodemailer": "^6.9.16"
 	},
 	"devDependencies": {
 		"nodemon": "^3.1.7"
