@@ -2,7 +2,7 @@ export interface ChildProps {
 	children: React.ReactNode
 }
 
-export interface IError {
+export interface IError extends Error {
 	response: { data: { message: string } }
 }
 

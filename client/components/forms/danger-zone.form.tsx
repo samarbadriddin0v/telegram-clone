@@ -8,15 +8,32 @@ import { confirmTextSchema } from '@/lib/validation'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Form, FormControl, FormDescription, FormField, FormItem, FormMessage } from '../ui/form'
 import { Input } from '../ui/input'
+import { generateToken } from '@/lib/generate-token'
+import { signOut, useSession } from 'next-auth/react'
+import { useMutation } from '@tanstack/react-query'
+import { axiosClient } from '@/http/axios'
 
 const DangerZoneForm = () => {
+	const { data: session } = useSession()
+
 	const form = useForm<z.infer<typeof confirmTextSchema>>({
 		resolver: zodResolver(confirmTextSchema),
 		defaultValues: { confirmText: '' },
 	})
 
-	function onSubmit(values: z.infer<typeof confirmTextSchema>) {
-		console.log(values)
+	const { mutate, isPending } = useMutation({
+		mutationFn: async () => {
+			const token = await generateToken(session?.currentUser?._id)
+			const { data } = await axiosClient.delete('/api/user', { headers: { Authorization: `Bearer ${token}` } })
+			return data
+		},
+		onSuccess: () => {
+			signOut()
+		},
+	})
+
+	function onSubmit() {
+		mutate()
 	}
 	return (
 		<>
@@ -49,13 +66,15 @@ const DangerZoneForm = () => {
 											Please type <span className='font-bold'>DELETE</span> to confirm.
 										</FormDescription>
 										<FormControl>
-											<Input className='bg-secondary' {...field} />
+											<Input className='bg-secondary' disabled={isPending} {...field} />
 										</FormControl>
 										<FormMessage className='text-xs text-red-500' />
 									</FormItem>
 								)}
 							/>
-							<Button className='w-full font-bold'>Submit</Button>
+							<Button className='w-full font-bold' disabled={isPending}>
+								Submit
+							</Button>
 						</form>
 					</Form>
 				</DialogContent>

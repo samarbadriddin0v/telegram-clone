@@ -6,7 +6,6 @@ import { useAuth } from '@/hooks/use-auth'
 import { toast } from '@/hooks/use-toast'
 import { axiosClient } from '@/http/axios'
 import { emailSchema } from '@/lib/validation'
-import { IError } from '@/types'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
 import React from 'react'
@@ -30,12 +29,6 @@ const SignIn = () => {
 			setEmail(res.email)
 			setStep('verify')
 			toast({ description: 'Email sent' })
-		},
-		onError: (error: IError) => {
-			if (error.response?.data?.message) {
-				return toast({ description: error.response.data.message, variant: 'destructive' })
-			}
-			return toast({ description: 'Something went wrong', variant: 'destructive' })
 		},
 	})
 
