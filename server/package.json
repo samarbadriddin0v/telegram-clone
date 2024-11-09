@@ -1,0 +1,23 @@
+{
+	"name": "server",
+	"version": "1.0.0",
+	"main": "app.js",
+	"scripts": {
+		"server": "nodemon app.js"
+	},
+	"keywords": [],
+	"author": "Samar Badriddinov",
+	"license": "ISC",
+	"description": "",
+	"dependencies": {
+		"cookie-parser": "^1.4.7",
+		"cors": "^2.8.5",
+		"dotenv": "^16.4.5",
+		"express": "^4.21.1",
+		"express-group-routes": "^1.1.0",
+		"http": "^0.0.1-security"
+	},
+	"devDependencies": {
+		"nodemon": "^3.1.7"
+	}
+}
