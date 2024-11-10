@@ -5,6 +5,8 @@ type Store = {
 	setCreating: (isCreating: boolean) => void
 	isLoading: boolean
 	setLoading: (isLoading: boolean) => void
+	loadMessages: boolean
+	setLoadMessages: (loadMessages: boolean) => void
 }
 
 export const useLoading = create<Store>()(set => ({
@@ -12,4 +14,6 @@ export const useLoading = create<Store>()(set => ({
 	setCreating: isCreating => set({ isCreating }),
 	isLoading: false,
 	setLoading: isLoading => set({ isLoading }),
+	loadMessages: false,
+	setLoadMessages: loadMessages => set({ loadMessages }),
 }))

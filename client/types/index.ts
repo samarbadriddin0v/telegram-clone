@@ -19,3 +19,14 @@ export interface IUser {
 	sendingSound: string
 	contacts: IUser[]
 }
+
+export interface IMessage {
+	_id: string
+	text: string
+	image: string
+	reaction: string
+	sender: IUser
+	receiver: IUser
+	createdAt: string
+	updatedAt: string
+}
