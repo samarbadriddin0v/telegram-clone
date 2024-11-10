@@ -3,7 +3,7 @@
 import { Loader2 } from 'lucide-react'
 import ContactList from './_components/contact-list'
 import { useEffect, useRef, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import AddContact from './_components/add-contact'
 import { useCurrentContact } from '@/hooks/use-current'
 import { useForm } from 'react-hook-form'
@@ -21,6 +21,7 @@ import { toast } from '@/hooks/use-toast'
 import { io } from 'socket.io-client'
 import { useAuth } from '@/hooks/use-auth'
 import useAudio from '@/hooks/use-audio'
+import { CONST } from '@/lib/constants'
 
 const HomePage = () => {
 	const [contacts, setContacts] = useState<IUser[]>([])
@@ -33,7 +34,10 @@ const HomePage = () => {
 	const { playSound } = useAudio()
 
 	const router = useRouter()
+	const searchParams = useSearchParams()
 	const socket = useRef<ReturnType<typeof io> | null>(null)
+
+	const CONTACT_ID = searchParams.get('chat')
 
 	const contactForm = useForm<z.infer<typeof emailSchema>>({
 		resolver: zodResolver(emailSchema),
@@ -68,6 +72,13 @@ const HomePage = () => {
 				headers: { Authorization: `Bearer ${token}` },
 			})
 			setMessages(data.messages)
+			setContacts(prev =>
+				prev.map(item =>
+					item._id === currentContact?._id
+						? { ...item, lastMessage: item.lastMessage ? { ...item.lastMessage, status: CONST.READ } : null }
+						: item
+				)
+			)
 		} catch {
 			toast({ description: 'Cannot fetch messages', variant: 'destructive' })
 		} finally {
@@ -104,13 +115,33 @@ const HomePage = () => {
 					const isExist = prev.some(item => item._id === newMessage._id)
 					return isExist ? prev : [...prev, newMessage]
 				})
+				setContacts(prev => {
+					return prev.map(contact => {
+						if (contact._id === sender._id) {
+							return {
+								...contact,
+								lastMessage: { ...newMessage, status: CONTACT_ID === sender._id ? CONST.READ : newMessage.status },
+							}
+						}
+						return contact
+					})
+				})
 				toast({ title: 'New message', description: `${sender?.email.split('@')[0]} sent you a message` })
 				if (!receiver.muted) {
 					playSound(receiver.notificationSound)
 				}
 			})
+
+			socket.current?.on('getReadMessages', (messages: IMessage[]) => {
+				setMessages(prev => {
+					return prev.map(item => {
+						const message = messages.find(msg => msg._id === item._id)
+						return message ? { ...item, status: CONST.READ } : item
+					})
+				})
+			})
 		}
-	}, [session?.currentUser, socket])
+	}, [session?.currentUser, socket, CONTACT_ID])
 
 	useEffect(() => {
 		if (currentContact?._id) {
@@ -149,6 +180,11 @@ const HomePage = () => {
 				{ headers: { Authorization: `Bearer ${token}` } }
 			)
 			setMessages(prev => [...prev, data.newMessage])
+			setContacts(prev =>
+				prev.map(item =>
+					item._id === currentContact?._id ? { ...item, lastMessage: { ...data.newMessage, status: CONST.READ } } : item
+				)
+			)
 			messageForm.reset()
 			socket.current?.emit('sendMessage', { newMessage: data.newMessage, receiver: data.receiver, sender: data.sender })
 		} catch {
@@ -158,32 +194,49 @@ const HomePage = () => {
 		}
 	}
 
+	const onReadMessages = async () => {
+		const receivedMessages = messages
+			.filter(message => message.receiver._id === session?.currentUser?._id)
+			.filter(message => message.status !== CONST.READ)
+
+		if (receivedMessages.length === 0) return
+		const token = await generateToken(session?.currentUser?._id)
+		try {
+			const { data } = await axiosClient.post<{ messages: IMessage[] }>(
+				'/api/user/message-read',
+				{ messages: receivedMessages },
+				{ headers: { Authorization: `Bearer ${token}` } }
+			)
+			socket.current?.emit('readMessages', { messages: data.messages, receiver: currentContact })
+			setMessages(prev => {
+				return prev.map(item => {
+					const message = data.messages.find(msg => msg._id === item._id)
+					return message ? { ...item, status: CONST.READ } : item
+				})
+			})
+		} catch {
+			toast({ description: 'Cannot read messages', variant: 'destructive' })
+		}
+	}
+
 	return (
 		<>
-			{/* Sidebar */}
 			<div className='w-80 h-screen border-r fixed inset-0 z-50'>
-				{/* Loading */}
 				{isLoading && (
 					<div className='w-full h-[95vh] flex justify-center items-center'>
 						<Loader2 size={50} className='animate-spin' />
 					</div>
 				)}
 
-				{/* Contact list */}
 				{!isLoading && <ContactList contacts={contacts} />}
 			</div>
-			{/* Chat area */}
 			<div className='pl-80 w-full'>
-				{/* Add contact */}
 				{!currentContact?._id && <AddContact contactForm={contactForm} onCreateContact={onCreateContact} />}
 
-				{/* Chat */}
 				{currentContact?._id && (
 					<div className='w-full relative'>
-						{/*Top Chat  */}
 						<TopChat />
-						{/* Chat messages */}
-						<Chat messageForm={messageForm} onSendMessage={onSendMessage} messages={messages} />
+						<Chat messageForm={messageForm} onSendMessage={onSendMessage} messages={messages} onReadMessages={onReadMessages} />
 					</div>
 				)}
 			</div>

@@ -5,7 +5,7 @@ import { Form, FormControl, FormField, FormItem } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { messageSchema } from '@/lib/validation'
 import { Paperclip, Send, Smile } from 'lucide-react'
-import { FC, useRef } from 'react'
+import { FC, useEffect, useRef } from 'react'
 import { UseFormReturn } from 'react-hook-form'
 import { z } from 'zod'
 import emojies from '@emoji-mart/data'
@@ -16,15 +16,22 @@ import { useLoading } from '@/hooks/use-loading'
 import { IMessage } from '@/types'
 
 interface Props {
-	onSendMessage: (values: z.infer<typeof messageSchema>) => void
+	onSendMessage: (values: z.infer<typeof messageSchema>) => Promise<void>
+	onReadMessages: () => Promise<void>
 	messageForm: UseFormReturn<z.infer<typeof messageSchema>>
 	messages: IMessage[]
 }
-const Chat: FC<Props> = ({ onSendMessage, messageForm, messages }) => {
+const Chat: FC<Props> = ({ onSendMessage, messageForm, messages, onReadMessages }) => {
 	const { loadMessages } = useLoading()
 
 	const { resolvedTheme } = useTheme()
 	const inputRef = useRef<HTMLInputElement | null>(null)
+	const scrollRef = useRef<HTMLFormElement | null>(null)
+
+	useEffect(() => {
+		scrollRef.current?.scrollIntoView({ behavior: 'smooth' })
+		onReadMessages()
+	}, [messages])
 
 	const handleEmojiSelect = (emoji: string) => {
 		const input = inputRef.current
@@ -63,7 +70,7 @@ const Chat: FC<Props> = ({ onSendMessage, messageForm, messages }) => {
 
 			{/* Message input */}
 			<Form {...messageForm}>
-				<form onSubmit={messageForm.handleSubmit(onSendMessage)} className='w-full flex relative'>
+				<form onSubmit={messageForm.handleSubmit(onSendMessage)} className='w-full flex relative' ref={scrollRef}>
 					<Button size={'icon'} type='button' variant={'secondary'}>
 						<Paperclip />
 					</Button>

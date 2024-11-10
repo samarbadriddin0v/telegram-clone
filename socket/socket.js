@@ -38,6 +38,13 @@ io.on('connection', socket => {
 		}
 	})
 
+	socket.on('readMessages', ({ receiver, messages }) => {
+		const receiverSocketId = getSocketId(receiver._id)
+		if (receiverSocketId) {
+			socket.to(receiverSocketId).emit('getReadMessages', messages)
+		}
+	})
+
 	socket.on('disconnect', () => {
 		console.log('User disconnected', socket.id)
 		users = users.filter(u => u.socketId !== socket.id)

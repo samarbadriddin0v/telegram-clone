@@ -1,6 +1,9 @@
 import { useCurrentContact } from '@/hooks/use-current'
+import { CONST } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import { IMessage } from '@/types'
+import { format } from 'date-fns'
+import { Check, CheckCheck } from 'lucide-react'
 import { FC } from 'react'
 
 interface Props {
@@ -23,7 +26,13 @@ const MessageCard: FC<Props> = ({ message }) => {
 				)}
 			>
 				<p className='text-sm text-white'>{message.text}</p>
-				<span className='text-xs right-1 bottom-0 absolute opacity-60'>✓</span>
+				<div className='right-1 bottom-0 absolute opacity-60 text-[9px] flex gap-[3px]'>
+					<p>{format(message.updatedAt, 'hh:mm')}</p>
+					<div className='self-end'>
+						{message.receiver._id === currentContact?._id &&
+							(message.status === CONST.READ ? <CheckCheck size={12} /> : <Check size={12} />)}
+					</div>
+				</div>
 			</div>
 		</div>
 	)
