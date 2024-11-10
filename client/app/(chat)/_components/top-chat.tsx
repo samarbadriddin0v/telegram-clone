@@ -2,12 +2,14 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
+import { useAuth } from '@/hooks/use-auth'
 import { useCurrentContact } from '@/hooks/use-current'
 import { Settings2 } from 'lucide-react'
 import Image from 'next/image'
 
 const TopChat = () => {
 	const { currentContact } = useCurrentContact()
+	const { onlineUsers } = useAuth()
 
 	return (
 		<div className='w-full flex items-center justify-between sticky top-0 z-50 h-[8vh] p-2 border-b bg-background'>
@@ -30,10 +32,15 @@ const TopChat = () => {
 						</div>
 					</div> */}
 					<p className='text-xs'>
-						{/* Online */}
-						{/* <span className='text-green-500'>●</span> Online */}
-						{/* Offline */}
-						<span className='text-muted-foreground'>●</span> Last seen recently
+						{onlineUsers.some(user => user._id === currentContact?._id) ? (
+							<>
+								<span className='text-green-500'>●</span> Online
+							</>
+						) : (
+							<>
+								<span className='text-muted-foreground'>●</span> Last seen recently
+							</>
+						)}
 					</p>
 				</div>
 			</div>

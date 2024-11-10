@@ -2,7 +2,7 @@
 
 import { Loader2 } from 'lucide-react'
 import ContactList from './_components/contact-list'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import AddContact from './_components/add-contact'
 import { useCurrentContact } from '@/hooks/use-current'
@@ -18,6 +18,8 @@ import { useSession } from 'next-auth/react'
 import { generateToken } from '@/lib/generate-token'
 import { IError, IUser } from '@/types'
 import { toast } from '@/hooks/use-toast'
+import { io } from 'socket.io-client'
+import { useAuth } from '@/hooks/use-auth'
 
 const HomePage = () => {
 	const [contacts, setContacts] = useState<IUser[]>([])
@@ -25,7 +27,10 @@ const HomePage = () => {
 	const { setCreating, setLoading, isLoading } = useLoading()
 	const { currentContact } = useCurrentContact()
 	const { data: session } = useSession()
+	const { setOnlineUsers } = useAuth()
+
 	const router = useRouter()
+	const socket = useRef<ReturnType<typeof io> | null>(null)
 
 	const contactForm = useForm<z.infer<typeof emailSchema>>({
 		resolver: zodResolver(emailSchema),
@@ -54,10 +59,15 @@ const HomePage = () => {
 
 	useEffect(() => {
 		router.replace('/')
+		socket.current = io('ws://localhost:5000')
 	}, [])
 
 	useEffect(() => {
 		if (session?.currentUser?._id) {
+			socket.current?.emit('addOnlineUser', session.currentUser)
+			socket.current?.on('getOnlineUsers', (data: { socketId: string; user: IUser }[]) => {
+				setOnlineUsers(data.map(item => item.user))
+			})
 			getContacts()
 		}
 	}, [session?.currentUser])
