@@ -28,7 +28,7 @@ export default function RootLayout({
 		<SessionProvider>
 			<QueryProvider>
 				<html lang='en' suppressHydrationWarning>
-					<body className={`${spaceGrotesk.variable} antialiased`} suppressHydrationWarning>
+					<body className={`${spaceGrotesk.variable} antialiased sidebar-custom-scrollbar`} suppressHydrationWarning>
 						<ThemeProvider attribute='class' defaultTheme='system' enableSystem disableTransitionOnChange>
 							<main>{children}</main>
 							<Toaster />

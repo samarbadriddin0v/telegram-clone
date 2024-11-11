@@ -7,6 +7,8 @@ type Store = {
 	setLoading: (isLoading: boolean) => void
 	loadMessages: boolean
 	setLoadMessages: (loadMessages: boolean) => void
+	typing: string
+	setTyping: (typing: string) => void
 }
 
 export const useLoading = create<Store>()(set => ({
@@ -16,4 +18,6 @@ export const useLoading = create<Store>()(set => ({
 	setLoading: isLoading => set({ isLoading }),
 	loadMessages: false,
 	setLoadMessages: loadMessages => set({ loadMessages }),
+	typing: '',
+	setTyping: typing => set({ typing }),
 }))

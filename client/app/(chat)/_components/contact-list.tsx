@@ -11,6 +11,8 @@ import { useCurrentContact } from '@/hooks/use-current'
 import { useAuth } from '@/hooks/use-auth'
 import { format } from 'date-fns'
 import { CONST } from '@/lib/constants'
+import Image from 'next/image'
+import { useSession } from 'next-auth/react'
 
 interface Props {
 	contacts: IUser[]
@@ -21,8 +23,15 @@ const ContactList: FC<Props> = ({ contacts }) => {
 	const { onlineUsers } = useAuth()
 	const router = useRouter()
 	const { setCurrentContact, currentContact } = useCurrentContact()
+	const { data: session } = useSession()
 
-	const filteredContacts = contacts.filter(contact => contact.email.toLowerCase().includes(query.toLowerCase()))
+	const filteredContacts = contacts
+		.filter(contact => contact.email.toLowerCase().includes(query.toLowerCase()))
+		.sort((a, b) => {
+			const dateA = a.lastMessage?.updatedAt ? new Date(a.lastMessage.updatedAt).getTime() : 0
+			const dateB = b.lastMessage?.updatedAt ? new Date(b.lastMessage.updatedAt).getTime() : 0
+			return dateB - dateA
+		})
 
 	const renderContact = (contact: IUser) => {
 		const onChat = () => {
@@ -46,24 +55,47 @@ const ContactList: FC<Props> = ({ contacts }) => {
 							<AvatarFallback className='uppercase'>{contact.email[0]}</AvatarFallback>
 						</Avatar>
 						{onlineUsers.some(user => user._id === contact._id) && (
-							<div className='size-3 bg-green-500 absolute rounded-full bottom-0 right-0 !z-50' />
+							<div className='size-3 bg-green-500 absolute rounded-full bottom-0 right-0 !z-40' />
 						)}
 					</div>
 
 					<div>
 						<h2 className='capitalize line-clamp-1 text-sm'>{contact.email.split('@')[0]}</h2>
-						<p
-							className={cn(
-								'text-xs line-clamp-1',
-								contact.lastMessage
-									? contact.lastMessage.status !== CONST.READ
-										? 'text-foreground'
+						{contact.lastMessage?.image && (
+							<div className='flex items-center gap-1'>
+								<Image src={contact.lastMessage.image} alt={contact.email} width={20} height={20} className='object-cover' />
+								<p
+									className={cn(
+										'text-xs line-clamp-1',
+										contact.lastMessage
+											? contact.lastMessage?.sender._id === session?.currentUser?._id
+												? 'text-muted-foreground'
+												: contact.lastMessage.status !== CONST.READ
+												? 'text-foreground'
+												: 'text-muted-foreground'
+											: 'text-muted-foreground'
+									)}
+								>
+									Photo
+								</p>
+							</div>
+						)}
+						{!contact.lastMessage?.image && (
+							<p
+								className={cn(
+									'text-xs line-clamp-1',
+									contact.lastMessage
+										? contact.lastMessage?.sender._id === session?.currentUser?._id
+											? 'text-muted-foreground'
+											: contact.lastMessage.status !== CONST.READ
+											? 'text-foreground'
+											: 'text-muted-foreground'
 										: 'text-muted-foreground'
-									: 'text-muted-foreground'
-							)}
-						>
-							{contact.lastMessage ? sliceText(contact.lastMessage.text, 25) : 'No messages yet'}
-						</p>
+								)}
+							>
+								{contact.lastMessage ? sliceText(contact.lastMessage.text, 25) : 'No messages yet'}
+							</p>
+						)}
 					</div>
 				</div>
 				{contact.lastMessage && (
@@ -78,7 +110,7 @@ const ContactList: FC<Props> = ({ contacts }) => {
 	return (
 		<>
 			{/* Top bar */}
-			<div className='flex items-center bg-background pl-2 sticky top-0'>
+			<div className='flex items-center bg-background pl-2 sticky top-0 z-50'>
 				<Settings />
 				<div className='m-2 w-full'>
 					<Input

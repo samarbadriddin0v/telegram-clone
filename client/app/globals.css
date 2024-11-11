@@ -67,3 +67,17 @@
 		@apply bg-background text-foreground font-spaceGrotesk;
 	}
 }
+
+.sidebar-custom-scrollbar::-webkit-scrollbar {
+	width: 4px;
+	height: 4px;
+	border-radius: 1px;
+}
+
+.sidebar-custom-scrollbar::-webkit-scrollbar-thumb {
+	background: linear-gradient(129deg, #2b6cb0 0%, #2b6cb0 100%);
+}
+
+.sidebar-custom-scrollbar::-webkit-scrollbar-thumb:hover {
+	background: linear-gradient(129deg, #2b6cb0 0%, #2b6cb0 100%);
+}
