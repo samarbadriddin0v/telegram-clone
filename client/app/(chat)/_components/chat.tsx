@@ -17,6 +17,7 @@ import { IMessage } from '@/types'
 import { useCurrentContact } from '@/hooks/use-current'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { UploadDropzone } from '@/lib/uploadthing'
+import { useSession } from 'next-auth/react'
 
 interface Props {
 	onSubmitMessage: (values: z.infer<typeof messageSchema>) => Promise<void>
@@ -31,10 +32,17 @@ const Chat: FC<Props> = ({ onSubmitMessage, messageForm, messages, onReadMessage
 	const [open, setOpen] = useState(false)
 
 	const { loadMessages } = useLoading()
-	const { editedMessage, setEditedMessage } = useCurrentContact()
+	const { editedMessage, setEditedMessage, currentContact } = useCurrentContact()
+	const { data: session } = useSession()
 	const { resolvedTheme } = useTheme()
 	const inputRef = useRef<HTMLInputElement | null>(null)
 	const scrollRef = useRef<HTMLFormElement | null>(null)
+
+	const filteredMessages = messages.filter(
+		message =>
+			(message.sender._id === session?.currentUser?._id && message.receiver._id === currentContact?._id) ||
+			(message.sender._id === currentContact?._id && message.receiver._id === session?.currentUser?._id)
+	)
 
 	useEffect(() => {
 		scrollRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -70,7 +78,7 @@ const Chat: FC<Props> = ({ onSubmitMessage, messageForm, messages, onReadMessage
 			{loadMessages && <ChatLoading />}
 
 			{/* Messages */}
-			{messages.map((message, index) => (
+			{filteredMessages.map((message, index) => (
 				<MessageCard key={index} message={message} onReaction={onReaction} onDeleteMessage={onDeleteMessage} />
 			))}
 

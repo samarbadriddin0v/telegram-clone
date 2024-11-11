@@ -5,7 +5,6 @@ import React, { FC, useState } from 'react'
 import Settings from './settings'
 import { Input } from '@/components/ui/input'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { useRouter } from 'next/navigation'
 import { cn, sliceText } from '@/lib/utils'
 import { useCurrentContact } from '@/hooks/use-current'
 import { useAuth } from '@/hooks/use-auth'
@@ -21,7 +20,6 @@ const ContactList: FC<Props> = ({ contacts }) => {
 	const [query, setQuery] = useState('')
 
 	const { onlineUsers } = useAuth()
-	const router = useRouter()
 	const { setCurrentContact, currentContact } = useCurrentContact()
 	const { data: session } = useSession()
 
@@ -37,7 +35,6 @@ const ContactList: FC<Props> = ({ contacts }) => {
 		const onChat = () => {
 			if (currentContact?._id === contact._id) return
 			setCurrentContact(contact)
-			router.push(`/?chat=${contact._id}`)
 		}
 
 		return (

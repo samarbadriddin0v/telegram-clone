@@ -3,7 +3,6 @@
 import { Loader2 } from 'lucide-react'
 import ContactList from './_components/contact-list'
 import { ChangeEvent, useEffect, useRef, useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
 import AddContact from './_components/add-contact'
 import { useCurrentContact } from '@/hooks/use-current'
 import { useForm } from 'react-hook-form'
@@ -33,11 +32,7 @@ const HomePage = () => {
 	const { setOnlineUsers } = useAuth()
 	const { playSound } = useAudio()
 
-	const router = useRouter()
-	const searchParams = useSearchParams()
 	const socket = useRef<ReturnType<typeof io> | null>(null)
-
-	const CONTACT_ID = searchParams.get('chat')
 
 	const contactForm = useForm<z.infer<typeof emailSchema>>({
 		resolver: zodResolver(emailSchema),
@@ -87,7 +82,6 @@ const HomePage = () => {
 	}
 
 	useEffect(() => {
-		router.replace('/')
 		socket.current = io('ws://localhost:5000')
 	}, [])
 
@@ -111,8 +105,8 @@ const HomePage = () => {
 			})
 
 			socket.current?.on('getNewMessage', ({ newMessage, sender, receiver }: GetSocketType) => {
-				setTyping('')
-				if (CONTACT_ID === newMessage.sender._id) {
+				setTyping({ message: '', sender: null })
+				if (currentContact?._id === newMessage.sender._id) {
 					setMessages(prev => [...prev, newMessage])
 				}
 				setContacts(prev => {
@@ -120,7 +114,7 @@ const HomePage = () => {
 						if (contact._id === sender._id) {
 							return {
 								...contact,
-								lastMessage: { ...newMessage, status: CONTACT_ID === sender._id ? CONST.READ : newMessage.status },
+								lastMessage: { ...newMessage, status: currentContact?._id === sender._id ? CONST.READ : newMessage.status },
 							}
 						}
 						return contact
@@ -141,7 +135,7 @@ const HomePage = () => {
 			})
 
 			socket.current?.on('getUpdatedMessage', ({ updatedMessage, sender }: GetSocketType) => {
-				setTyping('')
+				setTyping({ message: '', sender: null })
 				setMessages(prev =>
 					prev.map(item =>
 						item._id === updatedMessage._id ? { ...item, reaction: updatedMessage.reaction, text: updatedMessage.text } : item
@@ -169,12 +163,12 @@ const HomePage = () => {
 			})
 
 			socket.current?.on('getTyping', ({ message, sender }: GetSocketType) => {
-				if (CONTACT_ID === sender._id) {
-					setTyping(message)
+				if (currentContact?._id === sender._id) {
+					setTyping({ message, sender })
 				}
 			})
 		}
-	}, [session?.currentUser, socket, CONTACT_ID])
+	}, [session?.currentUser, currentContact?._id])
 
 	useEffect(() => {
 		if (currentContact?._id) {

@@ -1,3 +1,4 @@
+import { IUser } from '@/types'
 import { create } from 'zustand'
 
 type Store = {
@@ -7,8 +8,8 @@ type Store = {
 	setLoading: (isLoading: boolean) => void
 	loadMessages: boolean
 	setLoadMessages: (loadMessages: boolean) => void
-	typing: string
-	setTyping: (typing: string) => void
+	typing: { sender: IUser | null; message: string }
+	setTyping: (typing: { sender: IUser | null; message: string }) => void
 }
 
 export const useLoading = create<Store>()(set => ({
@@ -18,6 +19,6 @@ export const useLoading = create<Store>()(set => ({
 	setLoading: isLoading => set({ isLoading }),
 	loadMessages: false,
 	setLoadMessages: loadMessages => set({ loadMessages }),
-	typing: '',
+	typing: { sender: null, message: '' },
 	setTyping: typing => set({ typing }),
 }))
