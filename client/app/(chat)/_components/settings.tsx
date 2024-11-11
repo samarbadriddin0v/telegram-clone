@@ -40,7 +40,7 @@ const Settings = () => {
 		<>
 			<Popover>
 				<PopoverTrigger asChild>
-					<Button size={'icon'} variant={'secondary'}>
+					<Button size={'icon'} variant={'secondary'} className='max-md:w-full'>
 						<Menu />
 					</Button>
 				</PopoverTrigger>
@@ -104,7 +104,7 @@ const Settings = () => {
 			</Popover>
 
 			<Sheet open={isProfileOpen} onOpenChange={setIsProfileOpen}>
-				<SheetContent side={'left'} className='w-80 p-2'>
+				<SheetContent side={'left'} className='w-80 p-2 max-md:w-full'>
 					<SheetHeader>
 						<SheetTitle className='text-2xl'>My profile</SheetTitle>
 						<SheetDescription>
@@ -114,10 +114,12 @@ const Settings = () => {
 
 					<Separator className='my-2' />
 
-					<div className='mx-auto w-1/2 h-36 relative'>
+					<div className='mx-auto w-1/2 max-md:w-1/4 h-36 relative'>
 						<Avatar className='w-full h-36'>
 							<AvatarImage src={session?.currentUser?.avatar} alt={session?.currentUser?.email} className='object-cover' />
-							<AvatarFallback className='text-6xl uppercase font-spaceGrotesk'>SB</AvatarFallback>
+							<AvatarFallback className='text-6xl uppercase font-spaceGrotesk'>
+								{session?.currentUser?.email.charAt(0)}
+							</AvatarFallback>
 						</Avatar>
 						<UploadButton
 							endpoint='imageUploader'

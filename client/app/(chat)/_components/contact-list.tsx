@@ -43,7 +43,7 @@ const ContactList: FC<Props> = ({ contacts }) => {
 		return (
 			<div
 				className={cn(
-					'flex justify-between items-center cursor-pointer hover:bg-secondary/50 p-2',
+					'flex justify-between items-center cursor-pointer hover:bg-secondary/50 md:p-2',
 					currentContact?._id === contact._id && 'bg-secondary/50'
 				)}
 				onClick={onChat}
@@ -59,7 +59,7 @@ const ContactList: FC<Props> = ({ contacts }) => {
 						)}
 					</div>
 
-					<div>
+					<div className='max-md:hidden'>
 						<h2 className='capitalize line-clamp-1 text-sm'>{contact.email.split('@')[0]}</h2>
 						{contact.lastMessage?.image && (
 							<div className='flex items-center gap-1'>
@@ -99,7 +99,7 @@ const ContactList: FC<Props> = ({ contacts }) => {
 					</div>
 				</div>
 				{contact.lastMessage && (
-					<div className='self-end'>
+					<div className='self-end max-md:hidden'>
 						<p className='text-xs text-muted-foreground'>{format(contact.lastMessage.updatedAt, 'hh:mm a')}</p>
 					</div>
 				)}
@@ -110,9 +110,9 @@ const ContactList: FC<Props> = ({ contacts }) => {
 	return (
 		<>
 			{/* Top bar */}
-			<div className='flex items-center bg-background pl-2 sticky top-0 z-50'>
+			<div className='flex items-center bg-background md:pl-2 sticky top-0 z-50'>
 				<Settings />
-				<div className='m-2 w-full'>
+				<div className='md:m-2 w-full max-md:hidden'>
 					<Input
 						className='bg-secondary'
 						value={query}
@@ -122,14 +122,15 @@ const ContactList: FC<Props> = ({ contacts }) => {
 					/>
 				</div>
 			</div>
-
-			{filteredContacts.length === 0 ? (
-				<div className='w-full h-[95vh] flex justify-center items-center text-center text-muted-foreground'>
-					<p>Contact list is empty</p>
-				</div>
-			) : (
-				filteredContacts.map(contact => <div key={contact._id}>{renderContact(contact)}</div>)
-			)}
+			<div className='max-md:mt-2'>
+				{filteredContacts.length === 0 ? (
+					<div className='w-full h-[95vh] flex justify-center items-center text-center text-muted-foreground'>
+						<p>Contact list is empty</p>
+					</div>
+				) : (
+					filteredContacts.map(contact => <div key={contact._id}>{renderContact(contact)}</div>)
+				)}
+			</div>
 		</>
 	)
 }

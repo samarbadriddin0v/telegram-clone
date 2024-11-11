@@ -61,11 +61,11 @@ const TopChat: FC<Props> = ({ messages }) => {
 						<Settings2 />
 					</Button>
 				</SheetTrigger>
-				<SheetContent className='w-80 p-2 overflow-y-scroll sidebar-custom-scrollbar'>
+				<SheetContent className='w-80 max-md:w-full p-2 overflow-y-scroll sidebar-custom-scrollbar'>
 					<SheetHeader>
 						<SheetTitle />
 					</SheetHeader>
-					<div className='mx-auto w-1/2 h-36 relative'>
+					<div className='mx-auto w-1/2 max-md:w-1/4 h-36 relative'>
 						<Avatar className='w-full h-36'>
 							<AvatarImage src={currentContact?.avatar} alt={currentContact?.email} className='object-cover' />
 							<AvatarFallback className='text-6xl uppercase font-spaceGrotesk'>{currentContact?.email[0]}</AvatarFallback>
