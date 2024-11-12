@@ -39,9 +39,10 @@ const Chat: FC<Props> = ({ onSubmitMessage, messageForm, messages, onReadMessage
 	const scrollRef = useRef<HTMLFormElement | null>(null)
 
 	const filteredMessages = messages.filter(
-		message =>
-			(message.sender._id === session?.currentUser?._id && message.receiver._id === currentContact?._id) ||
-			(message.sender._id === currentContact?._id && message.receiver._id === session?.currentUser?._id)
+		(message, index, self) =>
+			((message.sender._id === session?.currentUser?._id && message.receiver._id === currentContact?._id) ||
+				(message.sender._id === currentContact?._id && message.receiver._id === session?.currentUser?._id)) &&
+			index === self.findIndex(m => m._id === message._id)
 	)
 
 	useEffect(() => {
