@@ -2,7 +2,9 @@
 
 <p align="center"><img src="https://socialify.git.ci/samarbadriddin0v/telegram-clone/image?language=1&amp;owner=1&amp;name=1&amp;stargazers=1&amp;theme=Light" alt="project-image"></p>
 
-  
+<h2>🚀 Demo</h2>
+
+[https://telegram.sammi.ac](https://telegram.sammi.ac)
   
 <h2>🧐 Features</h2>
 
